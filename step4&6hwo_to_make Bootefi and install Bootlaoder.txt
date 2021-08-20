@@ -1,0 +1,40 @@
+以下内容为《如何使用MackBook在移动硬盘安装Ubuntu系统》视频教程的第四步，如何制作Boot.efi启动文件步骤和命令
+
+1.Ctrl+Alt+T打开Terminal
+2.输入以下命令，把sdxx换成你安装移动硬盘中设置成ext4的分区名，比如sdd2或者sdd3：
+sudo mount /dev/sdxx /mnt
+3. 然后输入以下指令，挂载几个其它的路径：
+for i in /dev /dev/pts /proc /sys /run; do sudo mount -B $i /mnt$i; done
+4. 把root路径改成/mnt，这样Terminal的bash session就是在Ubuntu里面运行了：
+sudo chroot /mnt
+5. 设置GNU GRUB（GRand Unified Bootloader）:
+grub-mkconfig -o boot/grub/grub.cfg
+6. 把它保存到一个boot.efi文件中:
+grub-mkstandalone -o boot.efi -d usr/lib/grub/x86_64-efi -O x86_64-efi --compress=xz boot/grub/grub.cfg
+7. 退出：
+exit
+8. 把boot.efi文件拷贝到这个Ubuntu的live session中：
+cp /mnt/boot.efi /home/ubuntu
+9. 然后在home文件夹下找到boot.efi文件，通过邮件发送给自己，或者保存在你的云盘上,或者用存入另外插入的磁盘中
+10. 关闭Ubuntu。此时电脑会提示让你拔出装机的USB（就是烧录了镜像的USB，不是你的移动硬盘！）。拔除之后摁回车就可以。
+
+
+以下内容为《如何使用MackBook在移动硬盘安装Ubuntu系统》视频教程的第六步，如何安装BootLaoder文件的步骤和命令
+
+1. 在macOS系统下打开Terminal
+2. 插入刚安装好Ubuntu的移动硬盘，输入：
+cd /Volumes/UbuntuBootLoader/
+3. 依次输入以下命令：
+sudo mkdir System mach kernel 
+cd System 
+sudo mkdir -p Library/CoreServices 
+cd Library/CoreServices
+4. 从邮件/云盘上后者其他磁盘把你刚才保存的boot.efi文件下载下来，放在/Downloads文件夹
+5. 回到Terminal中，还在Library/CoreServices目录下输入以下指令：
+sudo cp ~/Downloads/boot.efi ./
+6. 下载SystemVersion.plist文件，可以点击这个链接下载到/Downloads，也可以在我的github的repository中找到
+7. 回到刚才的Terminal，把下载下来的plist文件保存到存放boot.efi的路径(/Volumes/UbuntuBootLoader/System/Library/CoreServices):
+sudo cp ~/Downloads/SystemVersion.plist ./
+8. 最后一步，在Terminal中输入：
+sudo bless --device /dev/diskNsK --setBoot
+把diskNsK换成在磁盘工具右下角中查看到的UbuntuBootLaoder的设备编号。
